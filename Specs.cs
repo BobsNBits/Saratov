@@ -1,4 +1,5 @@
 ﻿using System.Management;
+using NvAPIWrapper.GPU;
 
 namespace Saratov
 {
@@ -6,52 +7,54 @@ namespace Saratov
     {
         ManagementObjectSearcher ProcessorObject = new ManagementObjectSearcher("select * from Win32_Processor");
         ManagementObjectSearcher MemoryObject = new ManagementObjectSearcher("select * from Win32_OperatingSystem");
-        ManagementObjectSearcher VideoObject = new ManagementObjectSearcher("select * from Win32_VideoController");
 
-        public uint coresCPU()
+        PhysicalGPU[] gpus = PhysicalGPU.GetPhysicalGPUs();
+        public int coresCPU()
         {
             uint cores = 0;
             foreach (ManagementObject obj in ProcessorObject.Get())
             {
                 cores += (uint)obj["NumberOfCores"];
             }
-            return cores;
+            return (int)cores;
         }
-        public uint threadsCPU()
+        public int ThreadsCPU()
         {
             uint threads = 0;
             foreach (ManagementObject obj in ProcessorObject.Get())
             {
                 threads += (uint)obj["NumberOfLogicalProcessors"];
             }
-            return threads;
+            return (int)threads;
         }
-        public uint availableRAM()
+        public uint AvailableRAM()
         {
-            uint availableram = 0;
+            uint availableRAM = 0;
             foreach (ManagementObject obj in MemoryObject.Get())
             {
-                availableram = (uint.Parse(obj["FreePhysicalMemory"].ToString())) / 1024;
+                availableRAM = (uint.Parse(obj["FreePhysicalMemory"].ToString())) / 1024;
             }
-            return availableram;
+            return availableRAM;
         }
-        public uint totalRAM()
+        public uint TotalRAM()
         {
-            uint totalram = 0;
+            uint totalRAM = 0;
             foreach (ManagementObject obj in MemoryObject.Get())
             {
-                totalram = (uint.Parse(obj["TotalVisibleMemorySize"].ToString())) / 1024;
+                totalRAM = (uint.Parse(obj["TotalVisibleMemorySize"].ToString())) / 1024;
             }
-            return totalram;
+            return totalRAM;
         }
-        public uint totalVRAM()
+        public uint TotalVRAM()
         {
-            uint totalVram = 0;
-            foreach (ManagementObject obj in VideoObject.Get())
-            {
-                totalVram = (uint.Parse(obj["AdapterRAM"].ToString())) / (1024 * 1024);
-            }
-            return totalVram;
+
+            uint totalVRAM = gpus[0].MemoryInformation.AvailableDedicatedVideoMemoryInkB /1024 ;
+            return totalVRAM;
+        }
+        public uint AvailableVRAM()
+        {
+            uint availableVRAM = gpus[0].MemoryInformation.CurrentAvailableDedicatedVideoMemoryInkB / 1024;
+            return availableVRAM;
         }
     }
 }

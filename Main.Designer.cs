@@ -31,6 +31,10 @@ namespace Saratov
         {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Main));
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
             this.lblState = new System.Windows.Forms.Label();
             this.btnOpenFile = new System.Windows.Forms.Button();
             this.lblElevation = new System.Windows.Forms.Label();
@@ -46,6 +50,7 @@ namespace Saratov
             this.rbtnFreeArc = new System.Windows.Forms.RadioButton();
             this.rbtn7z = new System.Windows.Forms.RadioButton();
             this.gbParameters = new System.Windows.Forms.GroupBox();
+            this.cbPARThreads = new System.Windows.Forms.ComboBox();
             this.cbPARLevel = new System.Windows.Forms.ComboBox();
             this.cbPARFormat = new System.Windows.Forms.ComboBox();
             this.lblPARFormat = new System.Windows.Forms.Label();
@@ -55,48 +60,50 @@ namespace Saratov
             this.cbPARMemory = new System.Windows.Forms.ComboBox();
             this.cbPARWordSize = new System.Windows.Forms.ComboBox();
             this.lblPARWordSize = new System.Windows.Forms.Label();
-            this.tbPARThreads = new System.Windows.Forms.TextBox();
             this.lblPARThreads = new System.Windows.Forms.Label();
             this.lblPARLevel = new System.Windows.Forms.Label();
             this.lblAvailableMemory = new System.Windows.Forms.Label();
             this.btnTest = new System.Windows.Forms.Button();
             this.btnStartStop = new System.Windows.Forms.Button();
             this.gbBehaviour = new System.Windows.Forms.GroupBox();
+            this.rbtnBRemote = new System.Windows.Forms.RadioButton();
             this.rbtnBBrute = new System.Windows.Forms.RadioButton();
             this.rbtnBContinuous = new System.Windows.Forms.RadioButton();
             this.rbtnBRepack = new System.Windows.Forms.RadioButton();
             this.rbtnBNormal = new System.Windows.Forms.RadioButton();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
-            this.chkbSilent = new System.Windows.Forms.CheckBox();
             this.tbArgs = new System.Windows.Forms.TextBox();
-            this.chkbDeleteAfter = new System.Windows.Forms.CheckBox();
-            this.chkbMultiple = new System.Windows.Forms.CheckBox();
-            this.chkbNoValidation = new System.Windows.Forms.CheckBox();
             this.lblCoreThread = new System.Windows.Forms.Label();
-            this.ofdOpenDialog = new System.Windows.Forms.OpenFileDialog();
             this.timerContinuous = new System.Windows.Forms.Timer(this.components);
             this.dgvJobs = new System.Windows.Forms.DataGridView();
-            this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Address = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Progress = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn4 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn5 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.jobClassBindingSource = new System.Windows.Forms.BindingSource(this.components);
             this.btnClearAllJobs = new System.Windows.Forms.Button();
             this.btnClearDoneJobs = new System.Windows.Forms.Button();
             this.timerMemory = new System.Windows.Forms.Timer(this.components);
             this.btnSaveJobs = new System.Windows.Forms.Button();
             this.btnLoadJobs = new System.Windows.Forms.Button();
             this.btnOpenFolder = new System.Windows.Forms.Button();
-            this.chkbImmediate = new System.Windows.Forms.CheckBox();
             this.lblManual = new System.Windows.Forms.Label();
             this.bgWorker = new System.ComponentModel.BackgroundWorker();
+            this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.lblACSort = new System.Windows.Forms.Label();
+            this.lblACDeleteAfter = new System.Windows.Forms.Label();
+            this.lblACValidateInput = new System.Windows.Forms.Label();
+            this.lblACRunMany = new System.Windows.Forms.Label();
+            this.lblACImmediate = new System.Windows.Forms.Label();
+            this.lblACSilent = new System.Windows.Forms.Label();
+            this.ID = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.State = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.SizeBefore = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.SizeAfter = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.jobClassBindingSource = new System.Windows.Forms.BindingSource(this.components);
             this.gbAction.SuspendLayout();
             this.gbProgram.SuspendLayout();
             this.gbParameters.SuspendLayout();
             this.gbBehaviour.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvJobs)).BeginInit();
+            this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.jobClassBindingSource)).BeginInit();
             this.SuspendLayout();
             // 
@@ -113,13 +120,13 @@ namespace Saratov
             // 
             // btnOpenFile
             // 
+            this.btnOpenFile.Enabled = false;
             this.btnOpenFile.Location = new System.Drawing.Point(398, 136);
             this.btnOpenFile.Name = "btnOpenFile";
             this.btnOpenFile.Size = new System.Drawing.Size(75, 23);
             this.btnOpenFile.TabIndex = 4;
             this.btnOpenFile.Text = "Open File";
             this.btnOpenFile.UseVisualStyleBackColor = true;
-            this.btnOpenFile.Click += new System.EventHandler(this.btnBrowse_Click);
             // 
             // lblElevation
             // 
@@ -145,7 +152,7 @@ namespace Saratov
             // 
             // btnBenchmark
             // 
-            this.btnBenchmark.Location = new System.Drawing.Point(697, 194);
+            this.btnBenchmark.Location = new System.Drawing.Point(697, 57);
             this.btnBenchmark.Name = "btnBenchmark";
             this.btnBenchmark.Size = new System.Drawing.Size(75, 23);
             this.btnBenchmark.TabIndex = 7;
@@ -168,6 +175,7 @@ namespace Saratov
             // rbtnTest
             // 
             this.rbtnTest.AutoSize = true;
+            this.rbtnTest.Enabled = false;
             this.rbtnTest.Location = new System.Drawing.Point(133, 20);
             this.rbtnTest.Name = "rbtnTest";
             this.rbtnTest.Size = new System.Drawing.Size(46, 17);
@@ -180,6 +188,7 @@ namespace Saratov
             // rbtnExtract
             // 
             this.rbtnExtract.AutoSize = true;
+            this.rbtnExtract.Enabled = false;
             this.rbtnExtract.Location = new System.Drawing.Point(69, 20);
             this.rbtnExtract.Name = "rbtnExtract";
             this.rbtnExtract.Size = new System.Drawing.Size(58, 17);
@@ -192,6 +201,7 @@ namespace Saratov
             // rbtnAdd
             // 
             this.rbtnAdd.AutoSize = true;
+            this.rbtnAdd.Enabled = false;
             this.rbtnAdd.Location = new System.Drawing.Point(7, 20);
             this.rbtnAdd.Name = "rbtnAdd";
             this.rbtnAdd.Size = new System.Drawing.Size(56, 17);
@@ -237,7 +247,6 @@ namespace Saratov
             this.rbtnMCM.Tag = "MCM";
             this.rbtnMCM.Text = "MCM";
             this.rbtnMCM.UseVisualStyleBackColor = true;
-            this.rbtnMCM.CheckedChanged += new System.EventHandler(this.rbtnMCM_CheckedChanged);
             // 
             // rbtnFreeArc
             // 
@@ -250,17 +259,14 @@ namespace Saratov
             this.rbtnFreeArc.Tag = "FreeARC";
             this.rbtnFreeArc.Text = "FreeARC";
             this.rbtnFreeArc.UseVisualStyleBackColor = true;
-            this.rbtnFreeArc.CheckedChanged += new System.EventHandler(this.rbtnFreeArc_CheckedChanged);
             // 
             // rbtn7z
             // 
             this.rbtn7z.AutoSize = true;
-            this.rbtn7z.Checked = true;
             this.rbtn7z.Location = new System.Drawing.Point(6, 19);
             this.rbtn7z.Name = "rbtn7z";
             this.rbtn7z.Size = new System.Drawing.Size(44, 17);
             this.rbtn7z.TabIndex = 0;
-            this.rbtn7z.TabStop = true;
             this.rbtn7z.Tag = "7zip";
             this.rbtn7z.Text = "7zip";
             this.rbtn7z.UseVisualStyleBackColor = true;
@@ -268,6 +274,7 @@ namespace Saratov
             // 
             // gbParameters
             // 
+            this.gbParameters.Controls.Add(this.cbPARThreads);
             this.gbParameters.Controls.Add(this.cbPARLevel);
             this.gbParameters.Controls.Add(this.cbPARFormat);
             this.gbParameters.Controls.Add(this.lblPARFormat);
@@ -277,7 +284,6 @@ namespace Saratov
             this.gbParameters.Controls.Add(this.cbPARMemory);
             this.gbParameters.Controls.Add(this.cbPARWordSize);
             this.gbParameters.Controls.Add(this.lblPARWordSize);
-            this.gbParameters.Controls.Add(this.tbPARThreads);
             this.gbParameters.Controls.Add(this.lblPARThreads);
             this.gbParameters.Controls.Add(this.lblPARLevel);
             this.gbParameters.Location = new System.Drawing.Point(12, 188);
@@ -285,20 +291,23 @@ namespace Saratov
             this.gbParameters.Size = new System.Drawing.Size(380, 58);
             this.gbParameters.TabIndex = 11;
             this.gbParameters.TabStop = false;
-            this.gbParameters.Text = "Parameters/Options";
+            this.gbParameters.Text = "Parameters";
+            // 
+            // cbPARThreads
+            // 
+            this.cbPARThreads.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbPARThreads.Enabled = false;
+            this.cbPARThreads.FormattingEnabled = true;
+            this.cbPARThreads.Location = new System.Drawing.Point(202, 32);
+            this.cbPARThreads.Name = "cbPARThreads";
+            this.cbPARThreads.Size = new System.Drawing.Size(43, 21);
+            this.cbPARThreads.TabIndex = 25;
             // 
             // cbPARLevel
             // 
             this.cbPARLevel.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cbPARLevel.Enabled = false;
             this.cbPARLevel.FormattingEnabled = true;
-            this.cbPARLevel.Items.AddRange(new object[] {
-            "0",
-            "1",
-            "3",
-            "5",
-            "7",
-            "9"});
             this.cbPARLevel.Location = new System.Drawing.Point(142, 32);
             this.cbPARLevel.Name = "cbPARLevel";
             this.cbPARLevel.Size = new System.Drawing.Size(54, 21);
@@ -309,18 +318,11 @@ namespace Saratov
             this.cbPARFormat.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cbPARFormat.Enabled = false;
             this.cbPARFormat.FormattingEnabled = true;
-            this.cbPARFormat.Items.AddRange(new object[] {
-            "7z",
-            "bzip2",
-            "gzip",
-            "tar",
-            "wim",
-            "xz",
-            "zip"});
             this.cbPARFormat.Location = new System.Drawing.Point(6, 32);
             this.cbPARFormat.Name = "cbPARFormat";
             this.cbPARFormat.Size = new System.Drawing.Size(63, 21);
             this.cbPARFormat.TabIndex = 23;
+            this.cbPARFormat.SelectedIndexChanged += new System.EventHandler(this.cbPARFormat_SelectedIndexChanged);
             // 
             // lblPARFormat
             // 
@@ -337,15 +339,11 @@ namespace Saratov
             this.cbPARAlgorithm.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cbPARAlgorithm.Enabled = false;
             this.cbPARAlgorithm.FormattingEnabled = true;
-            this.cbPARAlgorithm.Items.AddRange(new object[] {
-            "LZMA2",
-            "LZMA",
-            "PPMd",
-            "BZip2"});
             this.cbPARAlgorithm.Location = new System.Drawing.Point(75, 32);
             this.cbPARAlgorithm.Name = "cbPARAlgorithm";
             this.cbPARAlgorithm.Size = new System.Drawing.Size(61, 21);
             this.cbPARAlgorithm.TabIndex = 21;
+            this.cbPARAlgorithm.SelectedIndexChanged += new System.EventHandler(this.cbPARAlgorithm_SelectedIndexChanged);
             // 
             // lblPARalgorithm
             // 
@@ -372,46 +370,18 @@ namespace Saratov
             // 
             this.cbPARMemory.Enabled = false;
             this.cbPARMemory.FormattingEnabled = true;
-            this.cbPARMemory.Items.AddRange(new object[] {
-            "32",
-            "48",
-            "64",
-            "96",
-            "128",
-            "192",
-            "256",
-            "384",
-            "512",
-            "768",
-            "1024",
-            "1536",
-            "2048",
-            "3072",
-            "3840"});
             this.cbPARMemory.Location = new System.Drawing.Point(308, 32);
             this.cbPARMemory.Name = "cbPARMemory";
             this.cbPARMemory.Size = new System.Drawing.Size(66, 21);
             this.cbPARMemory.TabIndex = 17;
-            this.toolTip1.SetToolTip(this.cbPARMemory, "Specify how much memory the program can use.\r\nThis is NOT dictionary size.\r\nIf le" +
-        "ft blank, an auto estimate will be used based on folder/file size.\r\n\r\n");
+            this.toolTip1.SetToolTip(this.cbPARMemory, "Specify how much memory the program can use.\r\nThis IS dictionary size.\r\nIf left b" +
+        "lank, an auto estimate will be used based on folder/file size.\r\n\r\n");
             // 
             // cbPARWordSize
             // 
             this.cbPARWordSize.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cbPARWordSize.Enabled = false;
             this.cbPARWordSize.FormattingEnabled = true;
-            this.cbPARWordSize.Items.AddRange(new object[] {
-            "8",
-            "12",
-            "16",
-            "32",
-            "48",
-            "64",
-            "96",
-            "128",
-            "192",
-            "256",
-            "273"});
             this.cbPARWordSize.Location = new System.Drawing.Point(251, 32);
             this.cbPARWordSize.Name = "cbPARWordSize";
             this.cbPARWordSize.Size = new System.Drawing.Size(51, 21);
@@ -428,16 +398,6 @@ namespace Saratov
             this.lblPARWordSize.TabIndex = 18;
             this.lblPARWordSize.Text = "Word size";
             this.toolTip1.SetToolTip(this.lblPARWordSize, "Specify the dictionarys\' word size.\r\nCan be blank.\r\n");
-            // 
-            // tbPARThreads
-            // 
-            this.tbPARThreads.Enabled = false;
-            this.tbPARThreads.Location = new System.Drawing.Point(202, 32);
-            this.tbPARThreads.Name = "tbPARThreads";
-            this.tbPARThreads.Size = new System.Drawing.Size(43, 20);
-            this.tbPARThreads.TabIndex = 16;
-            this.toolTip1.SetToolTip(this.tbPARThreads, "Specify how many threds to use for compressing.\r\nLeave blank for an auto estimate" +
-        ".");
             // 
             // lblPARThreads
             // 
@@ -471,7 +431,7 @@ namespace Saratov
             // 
             // btnTest
             // 
-            this.btnTest.Location = new System.Drawing.Point(697, 223);
+            this.btnTest.Location = new System.Drawing.Point(616, 57);
             this.btnTest.Name = "btnTest";
             this.btnTest.Size = new System.Drawing.Size(75, 23);
             this.btnTest.TabIndex = 13;
@@ -494,6 +454,7 @@ namespace Saratov
             // gbBehaviour
             // 
             this.gbBehaviour.AccessibleDescription = "";
+            this.gbBehaviour.Controls.Add(this.rbtnBRemote);
             this.gbBehaviour.Controls.Add(this.rbtnBBrute);
             this.gbBehaviour.Controls.Add(this.rbtnBContinuous);
             this.gbBehaviour.Controls.Add(this.rbtnBRepack);
@@ -506,18 +467,31 @@ namespace Saratov
             this.gbBehaviour.Text = "Behaviour";
             this.toolTip1.SetToolTip(this.gbBehaviour, resources.GetString("gbBehaviour.ToolTip"));
             // 
+            // rbtnBRemote
+            // 
+            this.rbtnBRemote.AutoSize = true;
+            this.rbtnBRemote.Enabled = false;
+            this.rbtnBRemote.Location = new System.Drawing.Point(309, 19);
+            this.rbtnBRemote.Name = "rbtnBRemote";
+            this.rbtnBRemote.Size = new System.Drawing.Size(62, 17);
+            this.rbtnBRemote.TabIndex = 4;
+            this.rbtnBRemote.TabStop = true;
+            this.rbtnBRemote.Tag = "Remote";
+            this.rbtnBRemote.Text = "Remote";
+            this.rbtnBRemote.UseVisualStyleBackColor = true;
+            // 
             // rbtnBBrute
             // 
             this.rbtnBBrute.AccessibleDescription = "";
             this.rbtnBBrute.AutoSize = true;
-            this.rbtnBBrute.Enabled = false;
             this.rbtnBBrute.Location = new System.Drawing.Point(223, 19);
             this.rbtnBBrute.Name = "rbtnBBrute";
             this.rbtnBBrute.Size = new System.Drawing.Size(80, 17);
             this.rbtnBBrute.TabIndex = 3;
-            this.rbtnBBrute.Tag = "Brute";
+            this.rbtnBBrute.Tag = "Brute Force";
             this.rbtnBBrute.Text = "Brute Force";
             this.rbtnBBrute.UseVisualStyleBackColor = true;
+            this.rbtnBBrute.CheckedChanged += new System.EventHandler(this.rbtnBBrute_CheckedChanged);
             // 
             // rbtnBContinuous
             // 
@@ -556,17 +530,7 @@ namespace Saratov
             this.rbtnBNormal.Tag = "Normal";
             this.rbtnBNormal.Text = "Normal";
             this.rbtnBNormal.UseVisualStyleBackColor = true;
-            // 
-            // chkbSilent
-            // 
-            this.chkbSilent.AutoSize = true;
-            this.chkbSilent.Location = new System.Drawing.Point(560, 140);
-            this.chkbSilent.Name = "chkbSilent";
-            this.chkbSilent.Size = new System.Drawing.Size(52, 17);
-            this.chkbSilent.TabIndex = 23;
-            this.chkbSilent.Text = "Silent";
-            this.toolTip1.SetToolTip(this.chkbSilent, "No Console Window");
-            this.chkbSilent.UseVisualStyleBackColor = true;
+            this.rbtnBNormal.CheckedChanged += new System.EventHandler(this.rbtnBNormal_CheckedChanged);
             // 
             // tbArgs
             // 
@@ -578,41 +542,6 @@ namespace Saratov
             this.tbArgs.Text = "Generated commands will show up here. For debug!";
             this.toolTip1.SetToolTip(this.tbArgs, "For Da Debug Purposes");
             // 
-            // chkbDeleteAfter
-            // 
-            this.chkbDeleteAfter.AutoSize = true;
-            this.chkbDeleteAfter.Location = new System.Drawing.Point(690, 140);
-            this.chkbDeleteAfter.Name = "chkbDeleteAfter";
-            this.chkbDeleteAfter.Size = new System.Drawing.Size(82, 17);
-            this.chkbDeleteAfter.TabIndex = 26;
-            this.chkbDeleteAfter.Text = "Delete After";
-            this.toolTip1.SetToolTip(this.chkbDeleteAfter, "Will delete the orignal files after completing the task.\r\nWill run a test on the " +
-        "archive before it deletes anything.\r\nDO NOT RELY ON THIS!");
-            this.chkbDeleteAfter.UseVisualStyleBackColor = true;
-            // 
-            // chkbMultiple
-            // 
-            this.chkbMultiple.AutoSize = true;
-            this.chkbMultiple.Enabled = false;
-            this.chkbMultiple.Location = new System.Drawing.Point(560, 198);
-            this.chkbMultiple.Name = "chkbMultiple";
-            this.chkbMultiple.Size = new System.Drawing.Size(75, 17);
-            this.chkbMultiple.TabIndex = 27;
-            this.chkbMultiple.Text = "Run Many";
-            this.toolTip1.SetToolTip(this.chkbMultiple, "Allow the program to start as many tasks as it wants.");
-            this.chkbMultiple.UseVisualStyleBackColor = true;
-            // 
-            // chkbNoValidation
-            // 
-            this.chkbNoValidation.AutoSize = true;
-            this.chkbNoValidation.Location = new System.Drawing.Point(560, 227);
-            this.chkbNoValidation.Name = "chkbNoValidation";
-            this.chkbNoValidation.Size = new System.Drawing.Size(89, 17);
-            this.chkbNoValidation.TabIndex = 28;
-            this.chkbNoValidation.Text = "No Validation";
-            this.toolTip1.SetToolTip(this.chkbNoValidation, "Will skip validation of the parameters.");
-            this.chkbNoValidation.UseVisualStyleBackColor = true;
-            // 
             // lblCoreThread
             // 
             this.lblCoreThread.AutoSize = true;
@@ -622,78 +551,53 @@ namespace Saratov
             this.lblCoreThread.TabIndex = 16;
             this.lblCoreThread.Text = "Cores / Threads:";
             // 
-            // ofdOpenDialog
-            // 
-            this.ofdOpenDialog.FileName = "Open...";
-            this.ofdOpenDialog.InitialDirectory = "C:\\";
-            // 
             // dgvJobs
             // 
+            this.dgvJobs.AllowUserToAddRows = false;
+            this.dgvJobs.AllowUserToDeleteRows = false;
             this.dgvJobs.AllowUserToOrderColumns = true;
             this.dgvJobs.AutoGenerateColumns = false;
+            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle1.NullValue = null;
+            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.dgvJobs.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
             this.dgvJobs.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgvJobs.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.dataGridViewTextBoxColumn1,
+            this.ID,
             this.Address,
-            this.dataGridViewTextBoxColumn3,
-            this.Progress,
-            this.dataGridViewTextBoxColumn4,
-            this.dataGridViewTextBoxColumn5});
+            this.State,
+            this.SizeBefore,
+            this.SizeAfter,
+            this.Progress});
             this.dgvJobs.DataSource = this.jobClassBindingSource;
             this.dgvJobs.Location = new System.Drawing.Point(12, 252);
             this.dgvJobs.Name = "dgvJobs";
+            this.dgvJobs.RowHeadersWidth = 51;
+            dataGridViewCellStyle4.NullValue = null;
+            this.dgvJobs.RowsDefaultCellStyle = dataGridViewCellStyle4;
             this.dgvJobs.Size = new System.Drawing.Size(760, 297);
             this.dgvJobs.TabIndex = 17;
-            this.dgvJobs.RowEnter += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvJobs_RowEnter);
-            // 
-            // dataGridViewTextBoxColumn1
-            // 
-            this.dataGridViewTextBoxColumn1.DataPropertyName = "ID";
-            this.dataGridViewTextBoxColumn1.HeaderText = "ID";
-            this.dataGridViewTextBoxColumn1.Name = "dataGridViewTextBoxColumn1";
-            this.dataGridViewTextBoxColumn1.ReadOnly = true;
-            this.dataGridViewTextBoxColumn1.Width = 50;
             // 
             // Address
             // 
             this.Address.DataPropertyName = "Address";
             this.Address.HeaderText = "Address";
+            this.Address.MinimumWidth = 6;
             this.Address.Name = "Address";
             this.Address.Width = 320;
-            // 
-            // dataGridViewTextBoxColumn3
-            // 
-            this.dataGridViewTextBoxColumn3.DataPropertyName = "State";
-            this.dataGridViewTextBoxColumn3.HeaderText = "State";
-            this.dataGridViewTextBoxColumn3.Name = "dataGridViewTextBoxColumn3";
-            this.dataGridViewTextBoxColumn3.ReadOnly = true;
-            this.dataGridViewTextBoxColumn3.Width = 90;
             // 
             // Progress
             // 
             this.Progress.HeaderText = "Progress";
+            this.Progress.MinimumWidth = 6;
             this.Progress.Name = "Progress";
             this.Progress.Visible = false;
             this.Progress.Width = 80;
-            // 
-            // dataGridViewTextBoxColumn4
-            // 
-            this.dataGridViewTextBoxColumn4.DataPropertyName = "SizeBefore";
-            this.dataGridViewTextBoxColumn4.HeaderText = "Size Before (MB)";
-            this.dataGridViewTextBoxColumn4.Name = "dataGridViewTextBoxColumn4";
-            this.dataGridViewTextBoxColumn4.ReadOnly = true;
-            this.dataGridViewTextBoxColumn4.Width = 110;
-            // 
-            // dataGridViewTextBoxColumn5
-            // 
-            this.dataGridViewTextBoxColumn5.DataPropertyName = "SizeAfter";
-            this.dataGridViewTextBoxColumn5.HeaderText = "Size After (MB)";
-            this.dataGridViewTextBoxColumn5.Name = "dataGridViewTextBoxColumn5";
-            this.dataGridViewTextBoxColumn5.ReadOnly = true;
-            // 
-            // jobClassBindingSource
-            // 
-            this.jobClassBindingSource.DataSource = typeof(Saratov.JobClass);
             // 
             // btnClearAllJobs
             // 
@@ -717,6 +621,7 @@ namespace Saratov
             // 
             // btnSaveJobs
             // 
+            this.btnSaveJobs.Enabled = false;
             this.btnSaveJobs.Location = new System.Drawing.Point(479, 165);
             this.btnSaveJobs.Name = "btnSaveJobs";
             this.btnSaveJobs.Size = new System.Drawing.Size(75, 23);
@@ -727,6 +632,7 @@ namespace Saratov
             // 
             // btnLoadJobs
             // 
+            this.btnLoadJobs.Enabled = false;
             this.btnLoadJobs.Location = new System.Drawing.Point(479, 136);
             this.btnLoadJobs.Name = "btnLoadJobs";
             this.btnLoadJobs.Size = new System.Drawing.Size(75, 23);
@@ -737,24 +643,13 @@ namespace Saratov
             // 
             // btnOpenFolder
             // 
+            this.btnOpenFolder.Enabled = false;
             this.btnOpenFolder.Location = new System.Drawing.Point(398, 165);
             this.btnOpenFolder.Name = "btnOpenFolder";
             this.btnOpenFolder.Size = new System.Drawing.Size(75, 23);
             this.btnOpenFolder.TabIndex = 22;
             this.btnOpenFolder.Text = "Open Folder";
             this.btnOpenFolder.UseVisualStyleBackColor = true;
-            this.btnOpenFolder.Click += new System.EventHandler(this.btnOpenFolder_Click);
-            // 
-            // chkbImmediate
-            // 
-            this.chkbImmediate.AutoSize = true;
-            this.chkbImmediate.Enabled = false;
-            this.chkbImmediate.Location = new System.Drawing.Point(560, 169);
-            this.chkbImmediate.Name = "chkbImmediate";
-            this.chkbImmediate.Size = new System.Drawing.Size(74, 17);
-            this.chkbImmediate.TabIndex = 24;
-            this.chkbImmediate.Text = "Immediate";
-            this.chkbImmediate.UseVisualStyleBackColor = true;
             // 
             // lblManual
             // 
@@ -769,8 +664,135 @@ namespace Saratov
             // bgWorker
             // 
             this.bgWorker.WorkerSupportsCancellation = true;
-            this.bgWorker.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorker1_DoWork);
-            this.bgWorker.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.backgroundWorker1_RunWorkerCompleted);
+            this.bgWorker.DoWork += new System.ComponentModel.DoWorkEventHandler(this.bgWorker_DoWork);
+            this.bgWorker.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.bgWorker_RunWorkerCompleted);
+            // 
+            // groupBox1
+            // 
+            this.groupBox1.Controls.Add(this.lblACSort);
+            this.groupBox1.Controls.Add(this.lblACDeleteAfter);
+            this.groupBox1.Controls.Add(this.lblACValidateInput);
+            this.groupBox1.Controls.Add(this.lblACRunMany);
+            this.groupBox1.Controls.Add(this.lblACImmediate);
+            this.groupBox1.Controls.Add(this.lblACSilent);
+            this.groupBox1.Location = new System.Drawing.Point(560, 136);
+            this.groupBox1.Name = "groupBox1";
+            this.groupBox1.Size = new System.Drawing.Size(212, 110);
+            this.groupBox1.TabIndex = 29;
+            this.groupBox1.TabStop = false;
+            this.groupBox1.Text = "Additional Controls";
+            // 
+            // lblACSort
+            // 
+            this.lblACSort.AutoSize = true;
+            this.lblACSort.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.lblACSort.ForeColor = System.Drawing.Color.Green;
+            this.lblACSort.Location = new System.Drawing.Point(84, 41);
+            this.lblACSort.Name = "lblACSort";
+            this.lblACSort.Size = new System.Drawing.Size(28, 15);
+            this.lblACSort.TabIndex = 34;
+            this.lblACSort.Text = "Sort";
+            this.lblACSort.Click += new System.EventHandler(this.lblACSort_Click);
+            // 
+            // lblACDeleteAfter
+            // 
+            this.lblACDeleteAfter.AutoSize = true;
+            this.lblACDeleteAfter.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.lblACDeleteAfter.ForeColor = System.Drawing.Color.Firebrick;
+            this.lblACDeleteAfter.Location = new System.Drawing.Point(84, 18);
+            this.lblACDeleteAfter.Name = "lblACDeleteAfter";
+            this.lblACDeleteAfter.Size = new System.Drawing.Size(65, 15);
+            this.lblACDeleteAfter.TabIndex = 33;
+            this.lblACDeleteAfter.Text = "Delete After";
+            this.lblACDeleteAfter.Click += new System.EventHandler(this.lblACDeleteAfter_Click);
+            // 
+            // lblACValidateInput
+            // 
+            this.lblACValidateInput.AutoSize = true;
+            this.lblACValidateInput.ForeColor = System.Drawing.Color.Firebrick;
+            this.lblACValidateInput.Location = new System.Drawing.Point(6, 64);
+            this.lblACValidateInput.Name = "lblACValidateInput";
+            this.lblACValidateInput.Size = new System.Drawing.Size(72, 13);
+            this.lblACValidateInput.TabIndex = 32;
+            this.lblACValidateInput.Text = "Validate Input";
+            // 
+            // lblACRunMany
+            // 
+            this.lblACRunMany.AutoSize = true;
+            this.lblACRunMany.ForeColor = System.Drawing.Color.DimGray;
+            this.lblACRunMany.Location = new System.Drawing.Point(6, 87);
+            this.lblACRunMany.Name = "lblACRunMany";
+            this.lblACRunMany.Size = new System.Drawing.Size(56, 13);
+            this.lblACRunMany.TabIndex = 31;
+            this.lblACRunMany.Text = "Run Many";
+            // 
+            // lblACImmediate
+            // 
+            this.lblACImmediate.AutoSize = true;
+            this.lblACImmediate.ForeColor = System.Drawing.Color.DimGray;
+            this.lblACImmediate.Location = new System.Drawing.Point(6, 41);
+            this.lblACImmediate.Name = "lblACImmediate";
+            this.lblACImmediate.Size = new System.Drawing.Size(55, 13);
+            this.lblACImmediate.TabIndex = 30;
+            this.lblACImmediate.Text = "Immediate";
+            // 
+            // lblACSilent
+            // 
+            this.lblACSilent.AutoSize = true;
+            this.lblACSilent.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.lblACSilent.ForeColor = System.Drawing.Color.Firebrick;
+            this.lblACSilent.Location = new System.Drawing.Point(6, 18);
+            this.lblACSilent.Name = "lblACSilent";
+            this.lblACSilent.Size = new System.Drawing.Size(35, 15);
+            this.lblACSilent.TabIndex = 29;
+            this.lblACSilent.Text = "Silent";
+            this.lblACSilent.Click += new System.EventHandler(this.lblACSilent_Click);
+            // 
+            // ID
+            // 
+            this.ID.DataPropertyName = "ID";
+            this.ID.HeaderText = "ID";
+            this.ID.MinimumWidth = 6;
+            this.ID.Name = "ID";
+            this.ID.ReadOnly = true;
+            this.ID.Width = 50;
+            // 
+            // State
+            // 
+            this.State.DataPropertyName = "State";
+            this.State.HeaderText = "State";
+            this.State.MinimumWidth = 6;
+            this.State.Name = "State";
+            this.State.ReadOnly = true;
+            this.State.Width = 90;
+            // 
+            // SizeBefore
+            // 
+            this.SizeBefore.DataPropertyName = "SizeBefore";
+            dataGridViewCellStyle2.Format = "N2";
+            dataGridViewCellStyle2.NullValue = null;
+            this.SizeBefore.DefaultCellStyle = dataGridViewCellStyle2;
+            this.SizeBefore.HeaderText = "Size Before (MB)";
+            this.SizeBefore.MinimumWidth = 6;
+            this.SizeBefore.Name = "SizeBefore";
+            this.SizeBefore.ReadOnly = true;
+            this.SizeBefore.Width = 110;
+            // 
+            // SizeAfter
+            // 
+            this.SizeAfter.DataPropertyName = "SizeAfter";
+            dataGridViewCellStyle3.Format = "N2";
+            dataGridViewCellStyle3.NullValue = null;
+            this.SizeAfter.DefaultCellStyle = dataGridViewCellStyle3;
+            this.SizeAfter.HeaderText = "Size After (MB)";
+            this.SizeAfter.MinimumWidth = 6;
+            this.SizeAfter.Name = "SizeAfter";
+            this.SizeAfter.ReadOnly = true;
+            this.SizeAfter.Width = 125;
+            // 
+            // jobClassBindingSource
+            // 
+            this.jobClassBindingSource.DataSource = typeof(Saratov.JobClass);
             // 
             // Main
             // 
@@ -778,13 +800,9 @@ namespace Saratov
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(784, 561);
-            this.Controls.Add(this.chkbNoValidation);
-            this.Controls.Add(this.chkbMultiple);
-            this.Controls.Add(this.chkbDeleteAfter);
+            this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.lblManual);
             this.Controls.Add(this.tbArgs);
-            this.Controls.Add(this.chkbImmediate);
-            this.Controls.Add(this.chkbSilent);
             this.Controls.Add(this.btnOpenFolder);
             this.Controls.Add(this.btnLoadJobs);
             this.Controls.Add(this.btnSaveJobs);
@@ -820,6 +838,8 @@ namespace Saratov
             this.gbBehaviour.ResumeLayout(false);
             this.gbBehaviour.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvJobs)).EndInit();
+            this.groupBox1.ResumeLayout(false);
+            this.groupBox1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.jobClassBindingSource)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -827,7 +847,6 @@ namespace Saratov
         }
 
         #endregion
-        private System.Windows.Forms.Label lblState;
         private System.Windows.Forms.Button btnOpenFile;
         private System.Windows.Forms.Label lblElevation;
         private System.Windows.Forms.Button btnElevate;
@@ -852,7 +871,6 @@ namespace Saratov
         private System.Windows.Forms.RadioButton rbtnBNormal;
         private System.Windows.Forms.ToolTip toolTip1;
         private System.Windows.Forms.Label lblCoreThread;
-        private System.Windows.Forms.OpenFileDialog ofdOpenDialog;
         private System.Windows.Forms.Timer timerContinuous;
         private System.Windows.Forms.DataGridViewTextBoxColumn iDDataGridViewTextBoxColumn;
         private System.Windows.Forms.DataGridViewTextBoxColumn addressDataGridViewTextBoxColumn;
@@ -867,32 +885,36 @@ namespace Saratov
         private System.Windows.Forms.Button btnLoadJobs;
         private System.Windows.Forms.Button btnOpenFolder;
         private System.Windows.Forms.Label lblPARThreads;
-        private System.Windows.Forms.CheckBox chkbSilent;
-        private System.Windows.Forms.CheckBox chkbImmediate;
-        internal System.Windows.Forms.TextBox tbPARThreads;
-        internal System.Windows.Forms.ComboBox cbPARMemory;
         internal System.Windows.Forms.DataGridView dgvJobs;
-        internal System.Windows.Forms.ComboBox cbPARWordSize;
         private System.Windows.Forms.Label lblPARWordSize;
-        internal System.Windows.Forms.ComboBox cbPARAlgorithm;
         private System.Windows.Forms.Label lblPARalgorithm;
         private System.Windows.Forms.TextBox tbArgs;
         private System.Windows.Forms.RadioButton rbtnBSC;
         private System.Windows.Forms.RadioButton rbtnBBrute;
-        internal System.Windows.Forms.ComboBox cbPARFormat;
         private System.Windows.Forms.Label lblPARFormat;
         private System.Windows.Forms.Label lblManual;
-        private System.Windows.Forms.CheckBox chkbDeleteAfter;
-        private System.Windows.Forms.CheckBox chkbMultiple;
-        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn1;
-        private System.Windows.Forms.DataGridViewTextBoxColumn Address;
-        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn3;
-        private System.Windows.Forms.DataGridViewTextBoxColumn Progress;
-        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn4;
-        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn5;
-        private System.Windows.Forms.CheckBox chkbNoValidation;
-        internal System.Windows.Forms.ComboBox cbPARLevel;
         private System.ComponentModel.BackgroundWorker bgWorker;
+        public System.Windows.Forms.Label lblState;
+        public System.Windows.Forms.ComboBox cbPARMemory;
+        public System.Windows.Forms.ComboBox cbPARWordSize;
+        public System.Windows.Forms.ComboBox cbPARAlgorithm;
+        public System.Windows.Forms.ComboBox cbPARFormat;
+        public System.Windows.Forms.ComboBox cbPARLevel;
+        public System.Windows.Forms.ComboBox cbPARThreads;
+        private System.Windows.Forms.RadioButton rbtnBRemote;
+        private System.Windows.Forms.GroupBox groupBox1;
+        private System.Windows.Forms.Label lblACSort;
+        private System.Windows.Forms.Label lblACDeleteAfter;
+        private System.Windows.Forms.Label lblACValidateInput;
+        private System.Windows.Forms.Label lblACRunMany;
+        private System.Windows.Forms.Label lblACImmediate;
+        private System.Windows.Forms.Label lblACSilent;
+        private System.Windows.Forms.DataGridViewTextBoxColumn ID;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Address;
+        private System.Windows.Forms.DataGridViewTextBoxColumn State;
+        private System.Windows.Forms.DataGridViewTextBoxColumn SizeBefore;
+        private System.Windows.Forms.DataGridViewTextBoxColumn SizeAfter;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Progress;
     }
 }
 

@@ -1,31 +1,33 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
+using System.Drawing;
 
 namespace Saratov
 {
     class Worker
     {
-        public void Start(JobClass job, string args, bool silent, int program)
+        public void Start(JobClass job, string args, Color silent, string program)
         {
             Process Worker = new Process();
             ProcessStartInfo startInfo = new ProcessStartInfo();
-
-            Worker.StartInfo.WorkingDirectory = System.IO.Path.GetDirectoryName(System.Windows.Forms.Application.ExecutablePath);
+            
+            Worker.StartInfo.WorkingDirectory = AppDomain.CurrentDomain.BaseDirectory.ToString();
             switch (program)
             {
-                case 1: { Worker.StartInfo.FileName = "7z.exe"; break; }
-                case 4: { Worker.StartInfo.FileName = "bsc.exe"; break; }
-            }
-
+                case "7zip": { Worker.StartInfo.FileName = "7z.exe"; break; }
+                case "BSC": { Worker.StartInfo.FileName = "bsc.exe"; break; }
+            }    
+            
             Worker.StartInfo.Arguments = args;
-
-            if (silent == true)
-            {
-                Worker.StartInfo.RedirectStandardOutput = true;
-                Worker.StartInfo.UseShellExecute = false;
-                Worker.StartInfo.CreateNoWindow = true;
-            }
-
+            
+            if (silent == Color.Green) {
+            Worker.StartInfo.RedirectStandardOutput = true;
+            Worker.StartInfo.UseShellExecute = false;
+            Worker.StartInfo.CreateNoWindow = true;}
+            
+            //TODO: BROKEY! CAUSES DEFOCUS!
             //Worker.StartInfo.WindowStyle = ProcessWindowStyle.Minimized;
+            
 
             Worker.Start();
             Worker.WaitForExit();

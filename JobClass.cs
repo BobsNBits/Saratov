@@ -5,10 +5,10 @@
         public int ID { get; set; }
         public string Address { get; set; }
         public string State { get; set; }
-        public float SizeBefore { get; set; }
-        public float SizeAfter { get; set; }
+        public double SizeBefore { get; set; }
+        public double SizeAfter { get; set; }
         public string Type { get; set; }
-        public JobClass(int id, string address, string state, float sizeBefore, float sizeAfter, string type)
+        public JobClass(int id, string address, string state, double sizeBefore, double sizeAfter, string type)
         {
             this.ID = id;
             this.Address = address;

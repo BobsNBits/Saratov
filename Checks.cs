@@ -37,9 +37,9 @@ namespace Saratov
             DirectoryInfo dirinfo = new DirectoryInfo(path);
             FileInfo fileinfo = new FileInfo(path);
             if (dirinfo.Exists == true)
-                return 1;
+                return 1; //Folder
             else if (fileinfo.Exists == true)
-                return 2;
+                return 2; //File
             else return 0;
         }
         public int DirType(string path)
@@ -55,24 +55,29 @@ namespace Saratov
             }
             return -1; //Probably a File
         }
-        public float Size(string path)
+        public double SizeOf(string path)
         {
             if (DirOrFile(path) == 2)
             {
-                return FileSize(path);
+                return FileSizeMB(path);
             }
             if (DirType(path) == 2)
             {
                 DirectoryInfo dirinfo = new DirectoryInfo(path);
-                return dirinfo.EnumerateFiles("*.*", SearchOption.AllDirectories).Sum(Files => Files.Length) / 1024 / 1024;
+                return dirinfo.EnumerateFiles("*.*", SearchOption.AllDirectories).Sum(Files => Files.Length) / 1024d / 1024d;
             }
             else
                 return -1;
         }
-        public float FileSize(string path)
+        public double FileSizeMB(string path)
         {
             FileInfo fi = new FileInfo(path);
-            return (fi.Length / 1024) / 1024;
+            return fi.Length / 1024d / 1024d;
+        }
+        public double FileSizeKB(string path)
+        {
+            FileInfo fi = new FileInfo(path);
+            return fi.Length / 1024d;
         }
     }
 }

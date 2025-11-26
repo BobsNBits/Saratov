@@ -1,29 +1,26 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.IO;
 using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
-using System.IO;
 using System.Diagnostics;
 
 namespace Saratov
 {
     public partial class Main : Form
     {
-        #region Declarations
+        #region Initializations
         public BindingList<JobClass> jobs = new BindingList<JobClass>();
-        public List<ParameterClass> parameters = new List<ParameterClass>();
-
+        //InputValidation inputValidation = new InputValidation();
+        SaveLoad saveload = new SaveLoad();
+        ClearJobs clearJobs = new ClearJobs();
         Checks check = new Checks();
         Specs specs = new Specs();
-        StartAdmin startAdmin = new StartAdmin();
-        CommandGen commandgen = new CommandGen();
-
-        OpenFileDialog fileDialog = new OpenFileDialog();
-        FolderBrowserDialog folderDialog = new FolderBrowserDialog();
-
-        //BackgroundWorker bgWorker = new BackgroundWorker();
+        RestartAsAdmin startAdmin = new RestartAsAdmin();
+        CommandGenerator cmdGen = new CommandGenerator();
+        //IdleMonitor idleMonitor = new IdleMonitor();
+        //DriveInfo[] allDrives = DriveInfo.GetDrives();
         #endregion
         public Main() { InitializeComponent(); }
 
@@ -31,8 +28,8 @@ namespace Saratov
         {
             lblElevation.Text = check.IsAdministrator();
             dgvJobs.DataSource = jobs;
-            lblCoreThread.Text = "Cores / Threads: " + specs.coresCPU() + "C / " + specs.threadsCPU().ToString() + "T";
-            lblAvailableMemory.Text = "Available Memory: " + specs.availableRAM() + "MB / " + specs.totalRAM() + "MB";
+            lblCoreThread.Text = "Cores / Threads: " + specs.coresCPU() + "C / " + specs.ThreadsCPU().ToString() + "T";
+            lblAvailableMemory.Text = "Available Memory: " + specs.AvailableRAM() + "MB / " + specs.TotalRAM() + "MB";
         }
 
         private void btnStart_Click(object sender, EventArgs e)
@@ -48,100 +45,150 @@ namespace Saratov
             //Start Pressed
             else
             {
+                if (dgvJobs.Rows.Count == 0)
+                {
+                    MessageBox.Show("Nothing to do.", "Info");
+                    return;
+                }
+
                 lblState.Text = "State: Active";
                 btnStartStop.BackColor = Color.Red;
                 btnStartStop.Text = "Stop";
+
                 bgWorker.RunWorkerAsync();
             }
         }
 
-        private void dgvJobs_RowEnter(object sender, DataGridViewCellEventArgs e)
-        {
-            //Update UI Parameter boxes based on selected task
-        }
-
-        private void btnTest_Click(object sender, EventArgs e)
-        {
-
-        }
-
         #region Background Worker
-        private void backgroundWorker1_DoWork(object sender, DoWorkEventArgs e)
+        private void bgWorker_DoWork(object sender, DoWorkEventArgs e)
         {
-            int program = 0;
-            int action = 0;
+            Worker worker = new Worker();
+            string program, action;
+            string behaviour = gbBehaviour.Controls.OfType<RadioButton>().FirstOrDefault(r => r.Checked).Tag.ToString();
+            int currentJob = 0;
+            bool bigJobSkip = false;
+            string args = null;
 
-            var selectedProgram = gbProgram.Controls.OfType<RadioButton>().FirstOrDefault(r => r.Checked);
-            var selectedAction = gbAction.Controls.OfType<RadioButton>().FirstOrDefault(r => r.Checked);
-            switch (selectedProgram.Tag)
+            #region Validation (Disabled, check TODO.cs) 
+
+            #endregion
+
+            #region Space Check (!Untested!)
+            foreach (JobClass job in jobs)
             {
-                case "7zip": { program = 1; break; }
-                case "FreeARC": { program = 2; break; }
-                case "MCM": { program = 3; break; }
-                case "BSC": { program = 4; break; }
-            }
-            try
-            {
-                switch (selectedAction.Tag)
+                DriveInfo driveInfo = new DriveInfo(Path.GetPathRoot(job.Address));
+                if (job.SizeBefore > driveInfo.AvailableFreeSpace / 1024 / 1024)
                 {
-                    case "Add": { action = 1; break; }
-                    case "Extract": { action = 2; break; }
-                    case "Test": { action = 3; break; }
-                    default: { MessageBox.Show("Please select an action.", "Info"); break; }
+                    if (MessageBox.Show("One or more jobs exceed the free space of the drive! \n" +
+                                        "Leave those jobs for next run?", "Attention!",
+                                        MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation) == DialogResult.Yes)
+                    { bigJobSkip = true; break; }
                 }
             }
-            catch
-            {
-                MessageBox.Show("Please select an action.", "Error");
-                return;
-            }
 
-            this.Invoke(new MethodInvoker(delegate ()
-            {
-                ValidateInput(program, action);
-            }));
-
-            Worker worker = new Worker();
-            int currentJob = 0;
+            if (bigJobSkip)
+                foreach (JobClass job in jobs)
+                {
+                    DriveInfo driveInfo = new DriveInfo(Path.GetPathRoot(job.Address));
+                    if (job.SizeBefore > driveInfo.AvailableFreeSpace / 1024 / 1024)
+                    {
+                        job.State = "Skip";
+                    }
+                }
+            #endregion
 
             while (currentJob < jobs.Count() && bgWorker.CancellationPending == false)
             {
-                if (jobs[currentJob].State == "Queued")
+                switch (behaviour)
                 {
-                    jobs[currentJob].State = "Working...";
+                    case "Normal":
+                        {
+                            #region Attempt to Determine Program
+                            try
+                            {
+                                program = gbProgram.Controls.OfType<RadioButton>().FirstOrDefault(r => r.Checked).Tag.ToString();
+                            }
+                            catch
+                            {
+                                MessageBox.Show("Please pick a program.", "Error");
+                                return;
+                            }
+                            #endregion
 
-                    string args = null;
+                            #region Attempt to Determine Action
+                            try
+                            {
+                                action = gbAction.Controls.OfType<RadioButton>().FirstOrDefault(r => r.Checked).Tag.ToString();
+                            }
+                            catch
+                            {
+                                MessageBox.Show("Please select an action.", "Error");
+                                return;
+                            }
+                            #endregion
 
-                    this.Invoke(new MethodInvoker(delegate ()
-                    {
-                        args = commandgen.Prepare(program, action, cbPARAlgorithm.Text,
-                                                                int.Parse(cbPARLevel.Text),
-                                                                int.Parse(cbPARMemory.Text),
-                                                                int.Parse(cbPARWordSize.Text),
-                                                                int.Parse(tbPARThreads.Text),
-                                                                cbPARFormat.Text,
-                                                                jobs[currentJob],
-                                                                chkbDeleteAfter.Checked);
-                    }));
+                            #region Rearm of skipped jobs
+                            if (jobs[currentJob].State == "Skip")
+                            {
+                                jobs[currentJob].State = "Queued";
+                                break;
+                            }
+                            #endregion
 
-                    Action delegateAction = () => tbArgs.Text = args;
-                    tbArgs.Invoke(delegateAction);
+                            jobs[currentJob].State = "Working...";
 
-                    worker.Start(jobs[currentJob], args, chkbSilent.Checked, program);
+                            this.Invoke(new MethodInvoker(delegate ()
+                            {
+                                //dgvJobs.Refresh();
 
-                    this.Invoke(new MethodInvoker(delegate ()
-                    {
-                        jobs[currentJob].SizeAfter = check.Size(Path.ChangeExtension(jobs[currentJob].Address, cbPARFormat.Text));
-                        jobs[currentJob].State = "DONE";
-                        dgvJobs.Refresh();
-                    }));
-                    currentJob++;
+                                args = cmdGen.Prepare(
+                                program, action,
+                                cbPARAlgorithm.Text,
+                                cbPARLevel.Text,
+                                cbPARMemory.Text,
+                                cbPARWordSize.Text,
+                                cbPARThreads.Text,
+                                cbPARFormat.Text,
+                                jobs[currentJob],
+                                lblACDeleteAfter.ForeColor
+                                );
+
+                                tbArgs.Text = args;
+                            }));
+
+                            worker.Start(jobs[currentJob], args, lblACSilent.ForeColor, program);
+
+                            this.Invoke(new MethodInvoker(delegate ()
+                            {
+                                jobs[currentJob].SizeAfter = check.SizeOf(jobs[currentJob].Address + "." + cbPARFormat.Text);
+                                jobs[currentJob].State = "DONE";
+                                dgvJobs.Refresh();
+                            }));
+
+                            currentJob++;
+                            break;
+                        }
+                    case "Brute Force":
+                        {
+                            {
+                                if (jobs[currentJob].State == "Queued")
+                                {
+                                    this.Invoke(new MethodInvoker(delegate ()
+                                    {
+                                        Brute brute = new Brute();
+                                        brute.Start(jobs[currentJob], lblACSilent.ForeColor);
+                                        dgvJobs.Refresh();
+                                        currentJob++;
+                                    }));
+                                }
+                                else { currentJob++; }
+                                break;
+                            }
+                        }
                 }
-                else { currentJob++; }
-            };
+            }
         }
-
-        private void backgroundWorker1_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        private void bgWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
             lblState.Text = "State: Inactive";
             btnStartStop.BackColor = Color.LimeGreen;
@@ -149,354 +196,265 @@ namespace Saratov
         }
         #endregion
 
-        #region User Input Validation
-        public void ValidateInput(int program, int action)
+        #region Self-Adjust (A adjusts B)
+
+        #region Behaviour -> All or Most
+        private void rbtnBBrute_CheckedChanged(object sender, EventArgs e)
         {
-            if (chkbNoValidation.Checked == false)
-            {
-                int availableThreads = (int)specs.threadsCPU();
-                int availableRAM = (int)specs.availableRAM();
-                int totalVRAM = (int)specs.totalVRAM();
+            rbtn7z.Enabled = false;
+            rbtnFreeArc.Enabled = false;
+            rbtnMCM.Enabled = false;
+            rbtnBSC.Enabled = false;
 
-                if (tbPARThreads.Text != "" && (int.Parse(tbPARThreads.Text) > availableThreads || int.Parse(tbPARThreads.Text) < 1))
-                {
-                    MessageBox.Show("You don't have that many threads.", "Info");
-                    tbPARThreads.Text = availableThreads.ToString();
-                }
+            rbtnAdd.Enabled = false;
+            rbtnExtract.Enabled = false;
+            rbtnTest.Enabled = false;
+        }
 
-                //Per Program Memory and Thread validation
-                switch (program)
-                {
-                    case 1: //7zip
-                        {
-                            int[] memoryTemplate = { 32, 48, 64, 96, 128, 192, 256, 384, 512, 768, 1024, 1536, 2048, 3072, 3840 };
-                            if (cbPARMemory.Text == "")
-                            {
-                                //MessageBox.Show("Empty Memory Box", "Debug");
-                                int memTindex = 0;
-                                if (tbPARThreads.Text == "")
-                                {
-                                    //MessageBox.Show("Empty Threads Box", "Debug");
-                                    tbPARThreads.Text = availableThreads.ToString();
-                                    //MessageBox.Show("Set Threads Box to " + availableThreads.ToString(), "Debug");
-
-                                    while ((int.Parse(tbPARThreads.Text) * memoryTemplate[memTindex]) * 5.5 < availableRAM * 0.8)
-                                    {
-                                        memTindex++;
-                                    };
-                                    cbPARMemory.Text = memoryTemplate[memTindex].ToString();
-                                    //MessageBox.Show("Set Memory Box to " + memoryTemplate[memTindex].ToString(), "Test");
-                                    //MessageBox.Show((int.Parse(tbThreads.Text) * memoryTemplate[memTindex] * 6).ToString(), "Debug");
-
-                                }
-                                else
-                                {
-                                    //MessageBox.Show("Filled Thread Box", "Debug");
-                                    while ((int.Parse(tbPARThreads.Text) * memoryTemplate[memTindex]) * 5.5 <= availableRAM * 0.8)
-                                    {
-                                        memTindex++;
-                                    };
-                                    cbPARMemory.Text = memoryTemplate[memTindex].ToString();
-                                    //MessageBox.Show("Set Memory Box to " + memoryTemplate[memTindex].ToString(), "Debug");
-                                }
-                            }
-                            else
-                            {
-                                if (tbPARThreads.Text == "")
-                                {
-                                    //MessageBox.Show("Empty Threads Box", "Debug");
-                                    tbPARThreads.Text = availableThreads.ToString();
-                                    //MessageBox.Show("Set Threads Box to " + availableThreads.ToString(), "Debug");
-                                    while (int.Parse(tbPARThreads.Text) * int.Parse(cbPARMemory.Text) * 5.5 > availableRAM)
-                                    {
-                                        if (int.Parse(tbPARThreads.Text) > 0)
-                                        {
-                                            tbPARThreads.Text = (int.Parse(tbPARThreads.Text) - 1).ToString();
-                                        }
-                                    };
-                                    if (int.Parse(tbPARThreads.Text) == 1)
-                                    {
-                                        MessageBox.Show("Insufficient RAM for the dictionary!", "Error");
-                                        tbPARThreads.Text = "";
-                                        cbPARMemory.Text = "";
-                                    }
-                                }
-                                else
-                                {
-                                    if (int.Parse(tbPARThreads.Text) * int.Parse(cbPARMemory.Text) * 5.5 > availableRAM)
-                                    {
-                                        MessageBox.Show("Insufficient RAM for the dictionary!", "Error");
-                                        tbPARThreads.Text = "";
-                                        cbPARMemory.Text = "";
-                                    }
-                                }
-                            }
-                            break;
-                        }
-                    case 4: //BSC
-                        {
-                            if (cbPARMemory.Text == "")
-                            {
-                                int[] memoryTemplate = { 32, 48, 64, 96, 128, 192, 256, 384, 512, 768, 1024, 1536, 2048, 3072, 3840 };
-                                int memTindex = 0;
-                                while ((memoryTemplate[memTindex] * 20) <= totalVRAM * 0.9)
-                                {
-
-                                    memTindex++;
-                                };
-                                cbPARMemory.Text = memoryTemplate[memTindex].ToString();
-                            }
-                            tbPARThreads.Text = "1";
-                            break;
-                            //GPU memory usage for NVIDIA CUDA technology is different from CPU memory usage
-                            //and can be estimated as 20 x block size for ST, 21 x block size for forward BWT
-                            //and 7 x block size for inverse BWT.
-                        }
-                }
-                //Per Program Level validation
-                switch (program)
-                {
-                    case 1:
-                        {
-                            if (cbPARLevel.Text == "" || int.Parse(cbPARLevel.Text) % 2 == 0 || (int.Parse(cbPARLevel.Text) < 0 || int.Parse(cbPARLevel.Text) > 9))
-                                cbPARLevel.Text = "9";
-                            break;
-                        }
-                    case 4:
-                        {
-                            cbPARLevel.Text = "-1";
-                            break;
-                        }
-                }
-            }
-
-            //Empty Parameter Fill
-            if (cbPARAlgorithm.Text == "") { cbPARAlgorithm.SelectedIndex = 1; }
-            if (cbPARFormat.Text == "") { cbPARFormat.SelectedIndex = 0; }
-            if (cbPARLevel.Text == "") { cbPARLevel.SelectedIndex = cbPARLevel.Items.Count - 1; }
-            if (cbPARWordSize.Text == "") { cbPARWordSize.SelectedIndex = 5; }
-            if (cbPARMemory.Text == "") { cbPARMemory.SelectedIndex = 2; }
-            if (tbPARThreads.Text == "") { tbPARThreads.Text = "2"; }
+        private void rbtnBNormal_CheckedChanged(object sender, EventArgs e)
+        {
+            rbtn7z.Enabled = true;
+            rbtnFreeArc.Enabled = false;
+            rbtnMCM.Enabled = false;
+            rbtnBSC.Enabled = true;
         }
         #endregion
 
-        #region Per action parameter enabling
-        //TODO: Switch to adjust based on the program
+        #region Program -> Action + Format
+        private void rbtn7z_CheckedChanged(object sender, EventArgs e)
+        {
+            //Actions
+            rbtnAdd.Enabled = true;
+            rbtnExtract.Enabled = true;
+            rbtnTest.Enabled = true;
+            //Formats
+            cbPARFormat.Items.Clear();
+            cbPARFormat.Items.AddRange(new string[] { "7z", "bzip2", "gzip", "tar", "wim", "xz", "zip" });
+        }
+
+        private void rbtnBSC_CheckedChanged(object sender, EventArgs e)
+        {
+            //Actions
+            rbtnAdd.Enabled = true;
+            rbtnExtract.Enabled = true;
+            rbtnTest.Enabled = false;
+            //Format
+            cbPARFormat.Items.Clear();
+            cbPARFormat.Items.Add("bsc");
+        }
+        #endregion
+
+        #region Action -> Parameter (On/Off)
         private void rbtnTest_CheckedChanged(object sender, EventArgs e)
         {
             cbPARFormat.Enabled = false;
             cbPARMemory.Enabled = false;
             cbPARLevel.Enabled = false;
-            tbPARThreads.Enabled = false;
+            cbPARThreads.Enabled = false;
             cbPARWordSize.Enabled = false;
             cbPARAlgorithm.Enabled = false;
         }
-
         private void rbtnExtract_CheckedChanged(object sender, EventArgs e)
         {
             cbPARFormat.Enabled = false;
             cbPARMemory.Enabled = false;
             cbPARLevel.Enabled = false;
-            tbPARThreads.Enabled = false;
+            cbPARThreads.Enabled = false;
             cbPARWordSize.Enabled = false;
             cbPARAlgorithm.Enabled = false;
         }
-
         private void rbtnAdd_CheckedChanged(object sender, EventArgs e)
         {
-            int program = 0;
-            var selectedProgram = gbProgram.Controls.OfType<RadioButton>()
-                                     .FirstOrDefault(r => r.Checked);
-
-            switch (selectedProgram.Tag)
+            switch (gbProgram.Controls.OfType<RadioButton>().FirstOrDefault(r => r.Checked).Tag)
             {
                 case "7zip":
-                    {
-                        program = 1;
-                        break;
-                    }
-                case "FreeARC":
-                    {
-                        program = 2;
-                        break;
-                    }
-                case "MCM":
-                    {
-                        program = 3;
-                        break;
-                    }
-                case "BSC":
-                    {
-                        program = 4;
-                        break;
-                    }
-            }
-            switch (program)
-            {
-                case 1:
                     {
                         cbPARFormat.Enabled = true;
                         cbPARMemory.Enabled = true;
                         cbPARLevel.Enabled = true;
-                        tbPARThreads.Enabled = true;
+                        cbPARThreads.Enabled = true;
                         cbPARWordSize.Enabled = true;
                         cbPARAlgorithm.Enabled = true;
                         break;
                     }
-                case 2:
+                case "FreeARC":
                     {
                         break;
                     }
-                case 3:
+                case "MCM":
                     {
                         break;
                     }
-                case 4:
+                case "BSC":
                     {
                         cbPARFormat.Enabled = true;
                         cbPARMemory.Enabled = true;
-                        cbPARLevel.Enabled = true;
-                        tbPARThreads.Enabled = false;
+                        cbPARLevel.Enabled = false;
+                        cbPARThreads.Enabled = false;
                         cbPARWordSize.Enabled = false;
                         cbPARAlgorithm.Enabled = true;
                         break;
                     }
-
             }
         }
         #endregion
 
-        #region Per program parameter section adjustment and action enabling
-        private void rbtn7z_CheckedChanged(object sender, EventArgs e)
+        #region Format -> Algorythm
+        private void cbPARFormat_SelectedIndexChanged(object sender, EventArgs e)
         {
-            rbtnTest.Enabled = true;
-            cbPARFormat.Items.Clear();
-            cbPARFormat.Items.Add("7z");
-            cbPARFormat.Items.Add("bzip2");
-            cbPARFormat.Items.Add("gzip");
-            cbPARFormat.Items.Add("tar");
-            cbPARFormat.Items.Add("wim");
-            cbPARFormat.Items.Add("xz");
-            cbPARFormat.Items.Add("zip");
+            string selectedFormat = cbPARFormat.Text;
+            switch (selectedFormat)
+            {
+                case "7z":
+                    {
+                        cbPARAlgorithm.Items.Clear();
+                        cbPARAlgorithm.Items.AddRange(new string[] { "LZMA2", "LZMA", "PPMd", "BZip2" });
+                        break;
+                    }
 
-            cbPARAlgorithm.Items.Clear();
-            cbPARAlgorithm.Items.Add("LZMA2");
-            cbPARAlgorithm.Items.Add("LZMA");
-            cbPARAlgorithm.Items.Add("PPMd");
-            cbPARAlgorithm.Items.Add("BZip2");
+                case "bzip2":
+                    {
+                        cbPARAlgorithm.Items.Clear();
+                        cbPARAlgorithm.Items.AddRange(new string[] { "BZip2" });
+                        break;
+                    }
+                case "gzip":
+                    {
+                        cbPARAlgorithm.Items.Clear();
+                        cbPARAlgorithm.Items.AddRange(new string[] { "Deflate" });
 
-            cbPARLevel.Items.Clear();
-            cbPARLevel.Items.Add("0");
-            cbPARLevel.Items.Add("1");
-            cbPARLevel.Items.Add("3");
-            cbPARLevel.Items.Add("5");
-            cbPARLevel.Items.Add("7");
-            cbPARLevel.Items.Add("9");
-        }
-
-        private void rbtnFreeArc_CheckedChanged(object sender, EventArgs e) { }
-
-        private void rbtnMCM_CheckedChanged(object sender, EventArgs e) { }
-
-        private void rbtnBSC_CheckedChanged(object sender, EventArgs e)
-        {
-            rbtnTest.Enabled = false;
-            cbPARFormat.Items.Clear();
-            cbPARFormat.Items.Add("bsc");
-
-            cbPARAlgorithm.Items.Clear();
-            cbPARAlgorithm.Items.Add("0");
-            cbPARAlgorithm.Items.Add("3");
-            cbPARAlgorithm.Items.Add("4");
-            cbPARAlgorithm.Items.Add("5");
-            cbPARAlgorithm.Items.Add("6");
-            cbPARAlgorithm.Items.Add("7");
-            cbPARAlgorithm.Items.Add("8");
-
-            cbPARLevel.Items.Clear();
-            cbPARLevel.Items.Add("-1");
+                        break;
+                    }
+                case "tar":
+                    {
+                        cbPARAlgorithm.Items.Clear();
+                        cbPARAlgorithm.Items.AddRange(new string[] { "GNU", "POSIX" });
+                        break;
+                    }
+                case "wim":
+                    {
+                        cbPARAlgorithm.Items.Clear();
+                        //Only Exception
+                        cbPARLevel.Items.Clear();
+                        cbPARThreads.Items.Clear();
+                        cbPARWordSize.Items.Clear();
+                        cbPARMemory.Items.Clear();
+                        //Consistantly inconsistant!
+                        break;
+                    }
+                case "xz":
+                    {
+                        cbPARAlgorithm.Items.Clear();
+                        cbPARAlgorithm.Items.AddRange(new string[] { "LZMA2" });
+                        break;
+                    }
+                case "zip":
+                    {
+                        cbPARAlgorithm.Items.Clear();
+                        cbPARAlgorithm.Items.AddRange(new string[] { "Deflate", "Deflate64", "BZip2", "LZMA", "PPMd" });
+                        break;
+                    }
+                case "bsc":
+                    {
+                        cbPARAlgorithm.Items.Clear();
+                        cbPARAlgorithm.Items.AddRange(new string[] { "BWT" });
+                        //, "ST-n3", "ST-n4", "ST-n5", "ST-n6", "ST-n7", "ST-n8"
+                        break;
+                    }
+            }
         }
         #endregion
 
-        #region Save and Load
-        private void btnSaveJobs_Click(object sender, EventArgs e)
+        #region Algorythm -> Dictionary, Word, Level
+        private void cbPARAlgorithm_SelectedIndexChanged(object sender, EventArgs e)
         {
-            OpenFileDialog ofd = new OpenFileDialog() { Filter = "Text|*.txt|All|*.*", ValidateNames = true, Multiselect = false };
-            if (ofd.ShowDialog() == DialogResult.OK)
+            string selectedAlgorythm = cbPARAlgorithm.Text;
+            switch (selectedAlgorythm)
             {
-                StreamWriter sw = new StreamWriter(ofd.FileName);
-                int listLenght = jobs.Count();
+                #region 7zip
+                case "LZMA2":
+                    {
+                        clearAll();
+                        cbPARLevel.Items.AddRange(new object[] { 1, 3, 5, 7, 9 });
+                        addThreads();
+                        cbPARWordSize.Items.AddRange(new object[] { 8, 12, 16, 24, 32, 48, 64, 96, 128, 192, 256, 273 });
+                        cbPARMemory.Items.AddRange(new object[] { 1, 2, 4, 8, 16, 32, 64, 128, 256, 384, 512, 768, 1024, 1536, 2048, 3072, 3840 });
 
-                foreach (var job in jobs)
-                {
-                    int i = jobs.Count - listLenght;
-                    sw.WriteLine
-                        (
-                        jobs[i].ID + " " +
-                        jobs[i].State + " " +
-                        jobs[i].Address + " " +
-                        jobs[i].SizeBefore + " " +
-                        jobs[i].SizeAfter + " "
-                        );
-                    listLenght -= 1;
-                }
-                sw.Close();
+                        break;
+                    }
+
+                case "LZMA":
+                    {
+                        clearAll();
+                        cbPARLevel.Items.AddRange(new object[] { 1, 3, 5, 7, 9 });
+                        addThreads();
+                        cbPARMemory.Items.AddRange(new object[] { 1, 2, 4, 8, 16, 32, 64, 128, 256, 384, 512, 768, 1024, 1536, 2048, 3072, 3840 });
+                        cbPARWordSize.Items.AddRange(new object[] { 8, 12, 16, 24, 32, 48, 64, 96, 128, 192, 256, 273 });
+                        break;
+                    }
+                case "PPMd":
+                    {
+                        clearAll();
+                        cbPARLevel.Items.AddRange(new object[] { 1, 3, 5, 7, 9 });
+                        //ERRORS OUT WITH ANYTHING ELSE
+                        //cbPARThreads.Items.Add(1);
+                        //cbPARMemory.Items.AddRange(new object[] { 1, 2, 4, 8, 16, 32, 64, 128, 256, 384, 512, 768, 1024 });
+                        //cbPARWordSize.Items.AddRange(new object[] { 2, 3, 4, 5, 6, 7, 8, 16, 24, 32 });
+                        break;
+                    }
+                case "BZip2":
+                    {
+                        clearAll();
+                        cbPARLevel.Items.AddRange(new object[] { 1, 3, 5, 7, 9 });
+                        addThreads();
+                        cbPARMemory.Items.Add("900KB");
+                        break;
+                    }
+                case "Deflate":
+                    {
+                        clearAll();
+
+                        cbPARLevel.Items.AddRange(new object[] { 1, 3, 5, 7, 9 });
+                        addThreads();
+                        cbPARMemory.Items.AddRange(new object[] { "32KB" });
+                        cbPARWordSize.Items.AddRange(new object[] { 8, 12, 16, 24, 32, 48, 64, 96, 128, 192, 256, 258 });
+                        break;
+                    }
+                case "Deflate64":
+                    {
+                        clearAll();
+                        cbPARLevel.Items.AddRange(new object[] { 1, 3, 5, 7, 9 });
+                        addThreads();
+                        cbPARMemory.Items.AddRange(new object[] { "64KB" });
+                        cbPARWordSize.Items.AddRange(new object[] { 8, 12, 16, 24, 32, 48, 64, 96, 128, 192, 256, 257 });
+                        break;
+                    }
+                #endregion
+                //BSC
+                case "BWT":
+                    {
+                        clearAll();
+                        cbPARMemory.Items.AddRange(new object[] { 1, 2, 4, 8, 16, 32, 64, 128, 256, 384, 512, 768, 1024, 2047 });
+                        break;
+                    }
+
             }
-        }
-
-        private void btnLoadJobs_Click(object sender, EventArgs e)
-        {
-            //TODO: Loading... Please wait [japanese letters here]
+            void clearAll()
+            {
+                cbPARLevel.Items.Clear();
+                cbPARThreads.Items.Clear();
+                cbPARWordSize.Items.Clear();
+                cbPARMemory.Items.Clear();
+            }
+            void addThreads()
+            {
+                int totalThedas = specs.ThreadsCPU();
+                for (int i = 1; i <= totalThedas; i++)
+                    cbPARThreads.Items.Add(i);
+            }
         }
         #endregion
 
-        #region Clear All and Done
-        private void btnClearAllJobs_Click(object sender, EventArgs e)
-        {
-
-            var mesBoxResult = MessageBox.Show("You are about to clear ALL jobs in the list \nProceed?", "Confirmation",
-                                                MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation);
-            switch (mesBoxResult)
-            {
-                case DialogResult.OK:
-                    {
-                        jobs.Clear();
-                        break;
-                    }
-                default:
-                    {
-                        break;
-                    }
-            }
-        }
-
-        private void btnClearDoneJobs_Click(object sender, EventArgs e)
-        {
-            var mesBoxResult = MessageBox.Show("Remove completed jobs?", "Confirmation",
-                                                MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation);
-            switch (mesBoxResult)
-            {
-                case DialogResult.OK:
-                    {
-                        int listLenght = jobs.Count;
-                        do
-                        {
-                            int i = jobs.Count - listLenght;
-                            if (jobs[i].State == "DONE")
-                            {
-                                jobs.Remove(jobs[i]);
-                            }
-                            listLenght -= 1;
-                        }
-                        while (listLenght != 0);
-                        break;
-                    }
-                default:
-                    {
-                        break;
-                    }
-            }
-        }
         #endregion
 
         #region Drag and drop
@@ -507,48 +465,12 @@ namespace Saratov
                 e.Effect = DragDropEffects.All;
             }
         }
-
         private void Main_DragDrop(object sender, DragEventArgs e)
         {
             string[] files = (string[])e.Data.GetData(DataFormats.FileDrop, false);
             foreach (string file in files)
             {
-                if (check.DirExists(file) == -1)
-                {
-                    break;
-                }
-                else
-                {
-                    jobs.Add(new JobClass(jobs.Count + 1, file, "Queued", check.Size(file), -1, "Waiting"));
-                    //dgvJobs.Name = "";
-                }
-                DirectoryInfo addressDI = new DirectoryInfo(file);
-            }
-        }
-        #endregion
-
-        #region Open Folder/Browse to buttons
-        private void btnBrowse_Click(object sender, EventArgs e)
-        {
-            if (fileDialog.ShowDialog() == DialogResult.OK)
-            {
-                if (check.DirExists(fileDialog.FileName) != -1)
-                {
-                    var filepath = fileDialog.FileName;
-                    jobs.Add(new JobClass(jobs.Count + 1, filepath, "Queued", check.Size(filepath), -1, "Waiting"));
-                }
-            }
-        }
-
-        private void btnOpenFolder_Click(object sender, EventArgs e)
-        {
-            if (folderDialog.ShowDialog() == DialogResult.OK)
-            {
-                if (check.DirExists(folderDialog.SelectedPath) != -1)
-                {
-                    var folderpath = folderDialog.SelectedPath;
-                    jobs.Add(new JobClass(jobs.Count + 1, folderpath, "Queued", check.Size(folderpath), -1, "Waiting"));
-                }
+                jobs.Add(new JobClass(jobs.Count + 1, file, "Queued", check.SizeOf(file), -1, "Waiting"));
             }
         }
         #endregion
@@ -593,5 +515,45 @@ namespace Saratov
             process.Start();
         }
         #endregion
+
+        #region Save and Load
+        private void btnSaveJobs_Click(object sender, EventArgs e) { saveload.Save(jobs); }
+        private void btnLoadJobs_Click(object sender, EventArgs e) { saveload.Load(); } //Not ready
+        #endregion
+
+        #region Clear All and Done
+        private void btnClearAllJobs_Click(object sender, EventArgs e) { jobs = ClearJobs.All(jobs); }
+        private void btnClearDoneJobs_Click(object sender, EventArgs e) { jobs = ClearJobs.Done(jobs); }
+        #endregion
+
+        #region Additional Controls
+        private void lblACSort_Click(object sender, EventArgs e)
+        {
+            lblACSort.ForeColor = Color.Olive;
+            var sortedJobs = new BindingList<JobClass>(jobs.OrderBy(x => x.SizeBefore).ToList());
+            jobs = sortedJobs;
+            dgvJobs.DataSource = null;
+            dgvJobs.DataSource = jobs;
+            GC.Collect();
+            lblACSort.ForeColor = Color.Green;
+        }
+        private void lblACDeleteAfter_Click(object sender, EventArgs e)
+        {
+            if (lblACDeleteAfter.ForeColor == Color.Firebrick)
+            { lblACDeleteAfter.ForeColor = Color.Green; }
+            else { lblACDeleteAfter.ForeColor = Color.Firebrick; }
+        }
+        private void lblACSilent_Click(object sender, EventArgs e)
+        {
+            if (lblACSilent.ForeColor == Color.Firebrick)
+            { lblACSilent.ForeColor = Color.Green; }
+            else { lblACSilent.ForeColor = Color.Firebrick; }
+        }
+        #endregion
+
+        private void btnTest_Click(object sender, EventArgs e)
+        {
+            //jobs.Add(new JobClass(1, "test", "test", 1.11, 1.22, "test"));
+        }
     }
 }
