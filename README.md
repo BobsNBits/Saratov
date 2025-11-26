@@ -1,10 +1,10 @@
-A very simple automation tool for compressing files and folders. (whole partitions as well)
+A very simple automation tool for compressing files and folders.
 
 The tool will be able to use a variety of programs to compress files.
 
-It will also be able to test and extract archives.
+It is also able to test and extract archives.
 
-BSC with GPU support (CUDA) executable taken from this repository:
+BSC (Version 3.3.10) with GPU support (CUDA) executable taken from this repository:
 https://github.com/IlyaGrebnov/libbsc
 
 7-zip executable taken from the standard install
